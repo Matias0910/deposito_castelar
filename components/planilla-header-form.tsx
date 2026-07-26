@@ -10,14 +10,10 @@ interface PlanillaHeaderFormProps {
 }
 
 const FIELDS: { key: keyof PlanillaHeader; label: string; type?: string; placeholder?: string }[] = [
-  { key: "linea", label: "Línea", placeholder: "Ej. Mitre / Sarmiento" },
   { key: "kilometraje", label: "Kilometraje", placeholder: "Ej. 141349" },
-  { key: "taller", label: "Taller / Depósito", placeholder: "Ej. Depósito Castelar" },
   { key: "ordenTrabajo", label: "Orden de Trabajo N°", placeholder: "Ej. 81996" },
   { key: "fechaIngreso", label: "Fecha y hora de ingreso", type: "datetime-local" },
   { key: "fechaEgreso", label: "Fecha y hora de egreso", type: "datetime-local" },
-  { key: "supervisor", label: "Supervisor a cargo", placeholder: "Nombre y apellido" },
-  { key: "legajo", label: "Legajo o CUIL", placeholder: "Ej. 12345" },
 ]
 
 export function PlanillaHeaderForm({ header, onChange }: PlanillaHeaderFormProps) {

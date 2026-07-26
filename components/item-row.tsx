@@ -6,6 +6,9 @@ import type { ChecklistItem } from "@/lib/planillas"
 import type { Estado, ItemEntry } from "@/lib/store"
 import { Input } from "@/components/ui/input"
 import { cn } from "@/lib/utils"
+import { TensionFlotante } from "./TensionFlotante"
+import { AnexoMecanico } from "./AnexoMecanico"
+import { AnexoBaterias } from "./AnexoBaterias"
 
 interface ItemRowProps {
   item: ChecklistItem
@@ -19,7 +22,7 @@ export function ItemRow({ item, entry, showOficio, onEstado, onField }: ItemRowP
   const oficio = OFICIOS_MAP[item.oficio]
   const OficioIcon = oficio.icon
 
-  const isDataOnly = item.odometro || item.nroCompresor
+  const isDataOnly = item.odometro || item.nroCompresor || item.tensionFlotante || item.anexoMecanico || item.anexoBaterias
 
   return (
     <div className="border-t border-border px-3 py-3 first:border-t-0 sm:px-4">
@@ -89,6 +92,12 @@ export function ItemRow({ item, entry, showOficio, onEstado, onField }: ItemRowP
               />
             </div>
           )}
+
+          {item.tensionFlotante && <TensionFlotante code={item.code} entry={entry} setField={onField} />}
+
+          {item.anexoMecanico && <AnexoMecanico code={item.code} entry={entry} setField={onField} />}
+
+          {item.anexoBaterias && <AnexoBaterias code={item.code} entry={entry} setField={onField} />}
         </div>
 
         {!isDataOnly && (
