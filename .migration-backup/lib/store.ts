@@ -1,6 +1,7 @@
 "use client"
 
 import { useCallback, useEffect, useState } from "react"
+import { getEmptyObservaciones } from "./observaciones"
 import type { PlanillaTipo } from "./planillas"
 
 export type Estado = "si" | "no" | ""
@@ -12,36 +13,48 @@ export interface ItemEntry {
   precintoTC2?: string
   odometroTC1?: string
   odometroTC2?: string
+  tensionFlotanteTC1Cajon1?: string
+  tensionFlotanteTC1Cajon2?: string
+  tensionFlotanteTC2Cajon1?: string
+  tensionFlotanteTC2Cajon2?: string
   nroCompresorTC1?: string
   nroCompresorTC2?: string
+  anexoMecanico?: Record<string, Record<string, string>>
+  anexoBaterias?: Record<string, Record<string, string>>
+}
+
+export interface FilaObservacion {
+  id: number
+  coche: string
+  simaf: string
+  tarea: string
+  observacion: string
+}
+
+export interface ObservacionesGenerales {
+  filas: FilaObservacion[]
+  // Se pueden agregar más campos a futuro si es necesario
 }
 
 export interface PlanillaHeader {
-  linea: string
   kilometraje: string
-  taller: string
   ordenTrabajo: string
   fechaIngreso: string
   fechaEgreso: string
-  supervisor: string
-  legajo: string
 }
 
 export interface PlanillaRecord {
   header: PlanillaHeader
   entries: Record<string, ItemEntry>
+  observaciones: ObservacionesGenerales
   updatedAt: string
 }
 
 const emptyHeader: PlanillaHeader = {
-  linea: "",
   kilometraje: "",
-  taller: "",
   ordenTrabajo: "",
   fechaIngreso: "",
   fechaEgreso: "",
-  supervisor: "",
-  legajo: "",
 }
 
 function storageKey(equipoId: number, tipo: PlanillaTipo) {
@@ -50,22 +63,36 @@ function storageKey(equipoId: number, tipo: PlanillaTipo) {
 
 export function loadRecord(equipoId: number, tipo: PlanillaTipo): PlanillaRecord {
   if (typeof window === "undefined") {
-    return { header: emptyHeader, entries: {}, updatedAt: "" }
+    return { header: emptyHeader, entries: {}, observaciones: getEmptyObservaciones(tipo), updatedAt: "" }
   }
   try {
     const raw = window.localStorage.getItem(storageKey(equipoId, tipo))
     if (raw) {
-      const parsed = JSON.parse(raw) as PlanillaRecord
-      return { header: { ...emptyHeader, ...parsed.header }, entries: parsed.entries ?? {}, updatedAt: parsed.updatedAt ?? "" }
+      const parsed = JSON.parse(raw) as any
+      const observaciones = parsed.observaciones ?? getEmptyObservaciones(tipo);
+
+      // Limpiamos los campos que ya no existen para evitar datos basura
+      if (parsed.header) {
+        delete parsed.header.linea
+        delete parsed.header.taller
+      }
+      return {
+        header: { ...emptyHeader, ...parsed.header },
+        entries: parsed.entries ?? {},
+        observaciones: observaciones,
+        updatedAt: parsed.updatedAt ?? "",
+      } as PlanillaRecord
     }
   } catch {
     // ignore
   }
-  return { header: emptyHeader, entries: {}, updatedAt: "" }
+  return { header: emptyHeader, entries: {}, observaciones: getEmptyObservaciones(tipo), updatedAt: "" }
 }
 
 export function useMantenimiento(equipoId: number, tipo: PlanillaTipo) {
-  const [record, setRecord] = useState<PlanillaRecord>(() => ({ header: emptyHeader, entries: {}, updatedAt: "" }))
+  const getEmptyRecord = (): PlanillaRecord => ({ header: emptyHeader, entries: {}, observaciones: getEmptyObservaciones(tipo), updatedAt: "" });
+
+  const [record, setRecord] = useState<PlanillaRecord>(getEmptyRecord)
   const [loaded, setLoaded] = useState(false)
 
   useEffect(() => {
@@ -142,9 +169,29 @@ export function useMantenimiento(equipoId: number, tipo: PlanillaTipo) {
     [equipoId, tipo],
   )
 
+  const setObservacion = useCallback(
+    (id: number, campo: keyof FilaObservacion, valor: string) => {
+      setRecord((prev) => {
+        const nextFilas = prev.observaciones.filas.map((f) => (f.id === id ? { ...f, [campo]: valor } : f))
+        const next: PlanillaRecord = {
+          ...prev,
+          observaciones: { ...prev.observaciones, filas: nextFilas },
+          updatedAt: new Date().toISOString(),
+        }
+        try {
+          window.localStorage.setItem(storageKey(equipoId, tipo), JSON.stringify(next))
+        } catch {
+          // ignore
+        }
+        return next
+      })
+    },
+    [equipoId, tipo],
+  )
+
   const reset = useCallback(() => {
-    persist({ header: emptyHeader, entries: {}, updatedAt: "" })
+    persist(getEmptyRecord())
   }, [persist])
 
-  return { record, loaded, setEstado, setField, setHeader, reset }
+  return { record, loaded, setEstado, setField, setHeader, setObservacion, reset }
 }

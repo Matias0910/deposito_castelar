@@ -1,15 +1,18 @@
 "use client"
 
-import { useMemo, useState } from "react"
-import { CalendarClock, CalendarRange, CheckCircle2, Printer, RotateCcw, Save } from "lucide-react"
-import { OFICIOS, type OficioId } from "@/lib/oficios"
+import { useMemo, useState } from "react";
+import { CalendarClock, CalendarRange, CheckCircle2, Printer, RotateCcw, Save, Send } from "lucide-react";
+import { OFICIOS, type OficioId } from "@/lib/oficios";
 import { getAllItems, PLANILLAS, type PlanillaTipo } from "@/lib/planillas"
-import { loadRecord, useMantenimiento } from "@/lib/store"
+import { useMantenimiento } from "@/lib/store";
 import { cn } from "@/lib/utils"
+import { Button } from "@/components/ui/button";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { EquipoSelector } from "./equipo-selector"
 import { OficioFilter } from "./oficio-filter"
 import { PlanillaHeaderForm } from "./planilla-header-form"
 import { SectionBlock } from "./section-block"
+import { PlanillaAnexoObservaciones } from "./planilla-anexo-observaciones";
 
 const TOTAL_EQUIPOS = 25
 
@@ -19,7 +22,7 @@ export function MantenimientoApp() {
   const [oficio, setOficio] = useState<OficioId | "todos">("todos")
 
   const planilla = PLANILLAS[tipo]
-  const { record, loaded, setEstado, setField, setHeader, reset } = useMantenimiento(equipo, tipo)
+  const { record, loaded, setEstado, setField, setHeader, setObservacion, reset } = useMantenimiento(equipo, tipo);
 
   const allItems = useMemo(() => getAllItems(planilla), [planilla])
 
@@ -30,16 +33,29 @@ export function MantenimientoApp() {
     return c
   }, [allItems])
 
-  const isVisible = (itemOficio: OficioId) => oficio === "todos" || itemOficio === oficio
+  const isVisible = (item: { oficio: OficioId }) => oficio === "todos" || item.oficio === oficio
 
-  const visibleItems = allItems.filter((i) => isVisible(i.oficio))
+  const visibleItems = allItems.filter((i) => isVisible(i))
   const doneVisible = visibleItems.filter((i) => (record.entries[i.code]?.estado ?? "") !== "").length
   const pct = visibleItems.length ? Math.round((doneVisible / visibleItems.length) * 100) : 0
 
-  // completeness per equipo for the selector (based on current tipo, all oficios)
+  // Función para calcular el completado de un equipo sin interferir con el estado.
+  const loadCompleteness = (equipoId: number, tipo: PlanillaTipo) => {
+    if (typeof window === "undefined") return 0;
+    try {
+      const raw = window.localStorage.getItem(`cartillas:v1:${equipoId}:${tipo}`);
+      if (!raw) return 0;
+      const parsed = JSON.parse(raw);
+      const entries = parsed.entries ?? {};
+      const done = allItems.filter((i) => (entries[i.code]?.estado ?? "") !== "").length;
+      return allItems.length ? Math.round((done / allItems.length) * 100) : 0;
+    } catch {
+      return 0;
+    }
+  };
+
   const completeness = (equipoId: number) => {
-    const rec = loadRecord(equipoId, tipo)
-    const done = allItems.filter((i) => (rec.entries[i.code]?.estado ?? "") !== "").length
+    const done = allItems.filter((i) => (record.entries[i.code]?.estado ?? "") !== "").length
     return allItems.length ? Math.round((done / allItems.length) * 100) : 0
   }
 
@@ -61,7 +77,7 @@ export function MantenimientoApp() {
 
       {/* Controls */}
       <div className="space-y-5 rounded-2xl border border-border bg-card p-4 print:hidden sm:p-5">
-        <EquipoSelector total={TOTAL_EQUIPOS} value={equipo} onChange={setEquipo} completeness={completeness} />
+        <EquipoSelector total={TOTAL_EQUIPOS} value={equipo} onChange={setEquipo} completeness={(id) => loadCompleteness(id, tipo)} />
 
         <div className="h-px bg-border" />
 
@@ -153,42 +169,53 @@ export function MantenimientoApp() {
         </div>
       </div>
 
-      {/* Header form */}
-      <div className="mt-6 rounded-2xl border border-border bg-card p-4 sm:p-5">
-        <div className="mb-4 flex items-center gap-2">
-          <Save className="size-4 text-primary" aria-hidden="true" />
-          <h2 className="text-sm font-semibold text-foreground">Datos de la cartilla</h2>
-          <span className="ml-auto font-mono text-[11px] text-muted-foreground">
-            {planilla.codigo} · v{planilla.version}
-          </span>
-        </div>
-        <PlanillaHeaderForm header={record.header} onChange={setHeader} />
-      </div>
-
-      {/* Sections */}
-      <div className="mt-6 space-y-4">
-        {!loaded ? (
-          <div className="rounded-xl border border-border bg-card p-8 text-center text-sm text-muted-foreground">
-            Cargando…
+      <Tabs defaultValue="cartilla" className="mt-4">
+        <TabsList className="grid w-full grid-cols-2 sm:w-[400px]">
+          <TabsTrigger value="cartilla">Cartilla de Mantenimiento</TabsTrigger>
+          <TabsTrigger value="observaciones">Observaciones Generales</TabsTrigger>
+        </TabsList>
+        <TabsContent value="cartilla">
+          {/* Header form */}
+          <div className="mt-6 rounded-2xl border border-border bg-card p-4 sm:p-5">
+            <div className="mb-4 flex items-center gap-2">
+              <Save className="size-4 text-primary" aria-hidden="true" />
+              <h2 className="text-sm font-semibold text-foreground">Datos de la cartilla</h2>
+              <span className="ml-auto font-mono text-[11px] text-muted-foreground">
+                {planilla.codigo} · v{planilla.version}
+              </span>
+            </div>
+            <PlanillaHeaderForm header={record.header} onChange={setHeader} />
           </div>
-        ) : (
-          planilla.sections.map((section) => {
-            const sectionItems = section.subgroups.flatMap((sg) => sg.items).filter((i) => isVisible(i.oficio))
-            if (sectionItems.length === 0) return null
-            return (
-              <SectionBlock
-                key={section.id}
-                section={section}
-                visibleItems={sectionItems}
-                record={record}
-                showOficio={oficio === "todos"}
-                onEstado={setEstado}
-                onField={setField}
-              />
-            )
-          })
-        )}
-      </div>
+
+          {/* Sections */}
+          <div className="mt-6 space-y-4">
+            {!loaded ? (
+              <div className="rounded-xl border border-border bg-card p-8 text-center text-sm text-muted-foreground">
+                Cargando…
+              </div>
+            ) : (
+              planilla.sections.map((section) => {
+                const sectionItems = section.subgroups.flatMap((sg) => sg.items).filter((i) => isVisible(i))
+                if (sectionItems.length === 0) return null
+                return (
+                  <SectionBlock
+                    key={section.id}
+                    section={section}
+                    visibleItems={sectionItems}
+                    record={record}
+                    showOficio={oficio === "todos"}
+                    onEstado={setEstado}
+                    onField={setField}
+                  />
+                )
+              })
+            )}
+          </div>
+        </TabsContent>
+        <TabsContent value="observaciones">
+          <PlanillaAnexoObservaciones header={record.header} filas={record.observaciones.filas} onFilaChange={setObservacion} />
+        </TabsContent>
+      </Tabs>
 
       <footer className="mt-8 border-t border-border pt-4 text-center text-xs text-muted-foreground print:hidden">
         Los datos se guardan automáticamente en este dispositivo. Conectá una base de datos para acceder desde cualquier
