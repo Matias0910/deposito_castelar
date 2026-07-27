@@ -71,6 +71,7 @@ export function loadRecord(equipoId: number, tipo: PlanillaTipo): PlanillaRecord
       const parsed = JSON.parse(raw) as any
       const observaciones = parsed.observaciones ?? getEmptyObservaciones(tipo);
 
+      // Limpiamos los campos que ya no existen para evitar datos basura
       if (parsed.header) {
         delete parsed.header.linea
         delete parsed.header.taller
