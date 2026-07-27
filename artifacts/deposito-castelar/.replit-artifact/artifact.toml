@@ -1,0 +1,27 @@
+kind = "web"
+previewPath = "/"
+title = "Cartillas de Mantenimiento"
+version = "1.0.0"
+id = "artifacts/deposito-castelar"
+router = "path"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 21512
+
+[services.development]
+run = "pnpm --filter @workspace/deposito-castelar run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/deposito-castelar", "run", "build" ]
+serve = "static"
+publicDir = "artifacts/deposito-castelar/dist/public"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "21512"
+BASE_PATH = "/"
