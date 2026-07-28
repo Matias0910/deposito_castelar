@@ -49,3 +49,6 @@ Thumbs.db
 .local/
 # Next.js / Cache extra
 .next/
+.env
+servidor-api/.env
+.env.*

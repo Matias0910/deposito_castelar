@@ -112,6 +112,36 @@ export function useMantenimiento(equipoId: number, tipo: PlanillaTipo) {
     [equipoId, tipo],
   )
 
+  const guardarEnHistorial = useCallback(async () => {
+    // Creamos un objeto que también incluya el tipo de planilla y el equipo,
+    // que son datos importantes para el historial.
+    const planillaParaGuardar = {
+      ...record,
+      tipoPlanilla: tipo,
+      equipo: equipoId,
+    };
+
+    try {
+      const response = await fetch('http://localhost:3001/api/planillas', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(planillaParaGuardar),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Error al guardar la planilla en el servidor');
+      }
+
+      return await response.json();
+    } catch (error) {
+      console.error("Error en guardarEnHistorial:", error);
+      throw error; // Re-lanzamos el error para que el componente que lo llama se entere.
+    }
+  }, [record, equipoId, tipo]);
+
   const setEstado = useCallback(
     (code: string, estado: Estado) => {
       setRecord((prev) => {
@@ -192,5 +222,10 @@ export function useMantenimiento(equipoId: number, tipo: PlanillaTipo) {
     persist(getEmptyRecord())
   }, [persist])
 
-  return { record, loaded, setEstado, setField, setHeader, setObservacion, reset }
+  const cargarRegistroDesdeHistorial = useCallback((registro: PlanillaRecord) => {
+    // Usamos la función persist para actualizar el estado y el localStorage
+    persist(registro);
+  }, [persist]);
+
+  return { record, loaded, setEstado, setField, setHeader, setObservacion, reset, guardarEnHistorial, cargarRegistroDesdeHistorial };
 }

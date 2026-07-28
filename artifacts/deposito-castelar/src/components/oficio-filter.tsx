@@ -6,9 +6,10 @@ interface OficioFilterProps {
   value: OficioId | "todos"
   onChange: (value: OficioId | "todos") => void
   counts: Record<string, number>
+  disabled?: boolean
 }
 
-export function OficioFilter({ value, onChange, counts }: OficioFilterProps) {
+export function OficioFilter({ value, onChange, counts, disabled = false }: OficioFilterProps) {
   return (
     <div className="space-y-3">
       <div className="flex items-center gap-2 text-sm font-medium text-foreground">
@@ -20,11 +21,13 @@ export function OficioFilter({ value, onChange, counts }: OficioFilterProps) {
           type="button"
           onClick={() => onChange("todos")}
           aria-pressed={value === "todos"}
+          disabled={disabled}
           className={cn(
             "inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-sm font-medium transition-colors",
             value === "todos"
               ? "border-primary bg-primary text-primary-foreground"
               : "border-border bg-card text-foreground hover:bg-accent",
+            disabled && "cursor-not-allowed opacity-50 hover:bg-card",
           )}
         >
           Todos
@@ -47,13 +50,13 @@ export function OficioFilter({ value, onChange, counts }: OficioFilterProps) {
               type="button"
               onClick={() => onChange(o.id)}
               aria-pressed={active}
-              disabled={count === 0}
+              disabled={count === 0 || disabled}
               className={cn(
                 "inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-sm font-medium transition-colors",
                 active
                   ? "border-primary bg-primary text-primary-foreground"
                   : "border-border bg-card text-foreground hover:bg-accent",
-                count === 0 && "cursor-not-allowed opacity-40 hover:bg-card",
+                (count === 0 || disabled) && "cursor-not-allowed opacity-40 hover:bg-card",
               )}
             >
               <Icon className="size-3.5" aria-hidden="true" />
