@@ -1,2 +1,3 @@
-import server from '../artifacts/api-server/dist/index.mjs';
-export default server;
+import app from '../artifacts/api-server/src/app.js';
+
+export default app;
