@@ -1,11 +1,11 @@
 {
   "version": 2,
   "framework": null,
-  "buildCommand": "pnpm build",
+  "buildCommand": "pnpm --filter deposito-castelar build",
   "rewrites": [
     {
       "source": "/(.*)",
-      "destination": "/api/index"
+      "destination": "/index.html"
     }
   ]
 }
