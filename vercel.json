@@ -2,16 +2,10 @@
   "version": 2,
   "framework": null,
   "buildCommand": "pnpm --filter @workspace/api-server run build",
-  "builds": [
+  "rewrites": [
     {
-      "src": "artifacts/api-server/dist/index.mjs",
-      "use": "@vercel/node"
-    }
-  ],
-  "routes": [
-    {
-      "src": "/(.*)",
-      "destination": "/artifacts/api-server/dist/index.mjs"
+      "source": "/(.*)",
+      "destination": "/api/index"
     }
   ]
 }
