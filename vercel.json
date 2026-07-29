@@ -1,9 +1,15 @@
 {
   "buildCommand": "pnpm --filter @workspace/api-server run build",
+  "outputDirectory": "artifacts/api-server/dist",
+  "functions": {
+    "index.mjs": {
+      "includeFiles": "artifacts/api-server/dist/**"
+    }
+  },
   "rewrites": [
     {
       "source": "/(.*)",
-      "destination": "/artifacts/api-server/dist/index.mjs"
+      "destination": "/index.mjs"
     }
   ]
 }

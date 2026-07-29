@@ -228,6 +228,9 @@ importers:
       react-router-dom:
         specifier: ^7.18.1
         version: 7.18.1(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      react-speech-recognition:
+        specifier: ^4.0.1
+        version: 4.0.1(react@18.3.1)
     devDependencies:
       '@hookform/resolvers':
         specifier: ^3.10.0
@@ -6175,6 +6178,11 @@ snapshots:
       react: 19.1.0
       react-dom: 19.1.0(react@19.1.0)
       react-transition-group: 4.4.5(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
+
+  react-speech-recognition@4.0.1(react@18.3.1):
+    dependencies:
+      lodash.debounce: 4.0.8
+      react: 18.3.1
 
   react-speech-recognition@4.0.1(react@19.1.0):
     dependencies:
