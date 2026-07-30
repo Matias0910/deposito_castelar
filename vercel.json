@@ -2,6 +2,7 @@
   "version": 2,
   "framework": null,
   "buildCommand": "pnpm --filter deposito-castelar build",
+  "outputDirectory": "artifacts/deposito-castelar/dist",
   "rewrites": [
     {
       "source": "/(.*)",
