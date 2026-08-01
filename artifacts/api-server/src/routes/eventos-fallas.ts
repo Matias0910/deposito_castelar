@@ -1,9 +1,9 @@
-import { Router, Request, Response } from 'express';
-import clientPromise from '../lib/mongodb';
+import { Router } from 'express';
+import clientPromise from '../lib/mongodb.js';
 
 const router = Router();
 
-router.get('/eventos-fallas', async (req: Request, res: Response) => {
+router.get('/eventos-fallas', async (req, res) => {
   try {
     const query = (req.query.q as string) || '';
 
