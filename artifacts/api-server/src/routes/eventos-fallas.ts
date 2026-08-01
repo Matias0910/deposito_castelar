@@ -10,7 +10,7 @@ router.get(
     res: Response<any>,
   ) => {
   try {
-    const query = (req.query.q as string) || '';
+    const query = ((req.query as any)?.q as string) || '';
 
     const client = await clientPromise;
     const db = client.db('app_castelar');
@@ -27,10 +27,10 @@ router.get(
 
     const fallas = await collection.find(searchQuery).limit(50).toArray();
 
-    return res.status(200).json(fallas);
+    return (res as any).status(200).json(fallas);
   } catch (e) {
     console.error(e);
-    return res.status(500).json({ error: 'Error al conectar con la base de datos' });
+    return (res as any).status(500).json({ error: 'Error al conectar con la base de datos' });
   }
 });
 
