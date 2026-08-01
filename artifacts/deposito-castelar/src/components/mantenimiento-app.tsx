@@ -1,9 +1,9 @@
 import { useMemo, useState } from "react";
 import { CalendarClock, CalendarRange, CheckCircle2, Printer, RotateCcw, Save, History, Wrench, Bot, Search, Eye } from "lucide-react";
-import type { PlanillaRecord } from "@/lib/store.ts";
+import type { PlanillaRecord } from "@/lib/store";
 import { OFICIOS, type OficioId } from "@/lib/oficios";
 import { getAllItems, PLANILLAS, type PlanillaTipo } from "@/lib/planillas";
-import { useMantenimiento } from "@/lib/store.ts";
+import { useMantenimiento } from "@/lib/store";
 import { cn } from "@/lib/utils";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { EquipoSelector } from "./equipo-selector";

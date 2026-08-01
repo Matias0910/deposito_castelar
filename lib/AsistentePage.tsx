@@ -1,4 +1,4 @@
-import { AsistenteIA } from '../components/AsistenteIA';
+import { AsistenteIA } from '@/components/AsistenteIA';
 
 export function AsistentePage() {
   return (

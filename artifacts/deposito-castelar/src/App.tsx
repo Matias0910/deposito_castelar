@@ -1,5 +1,7 @@
+/// <reference types="vite/client" />
 import { useState } from 'react';
 import { MantenimientoApp } from '@/components/mantenimiento-app';
+import type { OficioId } from "@/lib/oficios"; // o la ruta relativa correcta hacia oficios
 import { Wrench, Lock, Zap, Hammer, Shield, Droplets, Battery, HardHat, ShieldCheck } from "lucide-react";
 
 const OFICIOS_LOGIN = [
@@ -96,7 +98,7 @@ export default function App() {
   return (
     <div className="min-h-screen bg-background">
       <MantenimientoApp 
-        initialOficio={session.oficio} 
+        initialOficio={session.oficio as OficioId | "todos"}
         lockOficio={!session.isAdmin} // Si no sos admin, bloquea el cambio de oficio
       />
     </div>

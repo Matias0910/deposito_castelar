@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from "react"
 import { getEmptyObservaciones } from "./observaciones"
 import type { PlanillaTipo } from "./planillas"
+export type { PlanillaTipo }
 
 export type Estado = "si" | "no" | ""
 

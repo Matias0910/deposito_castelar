@@ -72,14 +72,14 @@ const TAREAS_BASE = [
 ]
 
 function mergePlanillas(base: ChecklistSection[], toAdd: ChecklistSection[]): ChecklistSection[] {
-  const allSections = JSON.parse(JSON.stringify([...base, ...toAdd]));
+  const allSections = JSON.parse(JSON.stringify([...base, ...toAdd])) as ChecklistSection[];
   const sectionsById = new Map<string, ChecklistSection>();
 
-  allSections.forEach(currentSection => {
+  allSections.forEach((currentSection: ChecklistSection) => {
     let section = sectionsById.get(currentSection.id);
     if (!section) {
       // Si la sección no existe, la creamos a partir de la actual
-      section = JSON.parse(JSON.stringify(currentSection));
+      section = JSON.parse(JSON.stringify(currentSection)) as ChecklistSection;
       sectionsById.set(currentSection.id, section);
     } else {
       // Si la sección ya existe, fusionamos los subgrupos

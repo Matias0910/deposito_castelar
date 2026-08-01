@@ -1,4 +1,4 @@
-import { HistorialPlanillas } from './artifacts/deposito-castelar/src/components/HistorialPlanillas';
+import { HistorialPlanillas } from './HistorialPlanillas';
 
 export function HistorialPage() {
   return (

@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react"
 import { History, Calendar, Train, Trash2, Eye } from "lucide-react"
 import type { PlanillaRecord, PlanillaTipo } from "@/lib/store";
-import { PLANILLAS, getAllItems } from "@/lib/planillas";
+import { PLANILLAS } from "@/lib/planillas";
 import { OFICIOS } from "@/lib/oficios";
 import { cn } from "@/lib/utils";
 
@@ -16,15 +16,15 @@ interface PlanillaHistorial extends PlanillaRecord {
   updatedAt: string;
 }
 
-interface HistorialPlanillasProps {
-  // La prop onCargar ha sido eliminada para que el historial sea solo de vista.
+export interface HistorialPlanillasProps {
+  onCargar?: (id: string) => void;
 }
 
-export function HistorialPlanillas({ onCargar }: HistorialPlanillasProps) {
+export function HistorialPlanillas({}: HistorialPlanillasProps) {
   const [planillas, setPlanillas] = useState<PlanillaHistorial[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [selectedPlanilla, setSelectedPlanilla] = useState<PlanillaHistorial | null>(null); // Estado para la planilla seleccionada
+  const [selectedPlanilla, setSelectedPlanilla] = useState<PlanillaHistorial | null>(null);
 
   useEffect(() => {
     fetch('http://localhost:3001/api/planillas')
@@ -35,7 +35,7 @@ export function HistorialPlanillas({ onCargar }: HistorialPlanillasProps) {
         }
         setLoading(false);
       })
-      .catch(err => {
+      .catch(() => {
         setError("No se pudo cargar el historial. Revisa la conexión con el servidor.");
         setLoading(false);
       });
@@ -55,7 +55,6 @@ export function HistorialPlanillas({ onCargar }: HistorialPlanillasProps) {
         throw new Error('Error al eliminar la planilla desde el servidor.');
       }
 
-      // Actualiza el estado para remover la planilla eliminada de la UI
       setPlanillas(planillas.filter(p => p._id !== id));
       alert("Planilla eliminada con éxito.");
     } catch (err) {
@@ -63,11 +62,8 @@ export function HistorialPlanillas({ onCargar }: HistorialPlanillasProps) {
     }
   };
 
-  // Si hay una planilla seleccionada, mostramos el modal de solo lectura
   if (selectedPlanilla) {
     const currentPlanillaDefinition = PLANILLAS[selectedPlanilla.tipoPlanilla];
-    // No necesitamos allItems aquí para la visualización, pero lo mantengo por si se quiere usar para algo más.
-    // const allItems = getAllItems(currentPlanillaDefinition);
 
     return (
       <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-75 p-4">
@@ -82,7 +78,7 @@ export function HistorialPlanillas({ onCargar }: HistorialPlanillasProps) {
           
           <div className="mb-4 p-4 border rounded-md bg-gray-50">
             <p className="text-lg font-semibold">Equipo: {selectedPlanilla.equipo}</p>
-            <p className="text-md">Tipo de Planilla: {currentPlanillaDefinition.nombre}</p>
+            <p className="text-md">Tipo de Planilla: {currentPlanillaDefinition?.nombre || selectedPlanilla.tipoPlanilla}</p>
             <p className="text-sm text-gray-600">Guardado: {new Date(selectedPlanilla.createdAt).toLocaleString("es-AR")}</p>
             <p className="text-sm text-gray-600">Última Actualización: {new Date(selectedPlanilla.updatedAt).toLocaleString("es-AR")}</p>
           </div>
@@ -97,7 +93,7 @@ export function HistorialPlanillas({ onCargar }: HistorialPlanillasProps) {
 
           <div className="mb-4 p-4 border rounded-md">
             <h3 className="text-xl font-semibold mb-2">Ítems de Checklist</h3>
-            {currentPlanillaDefinition.sections.map(section => (
+            {currentPlanillaDefinition?.sections.map(section => (
               <div key={section.id} className="mb-4">
                 <h4 className="text-lg font-bold mb-2">{section.group} - {section.title}</h4>
                 {section.subgroups.map(subgroup => (
@@ -105,14 +101,14 @@ export function HistorialPlanillas({ onCargar }: HistorialPlanillasProps) {
                     <h5 className="text-md font-semibold mb-1">{subgroup.title}</h5>
                     <ul className="list-disc list-inside">
                       {subgroup.items.map(item => {
-                        const entry = selectedPlanilla.entries[item.code];
+                        const entry = selectedPlanilla.entries?.[item.code] as any;
                         const estado = entry?.estado || 'N/A';
-                        const field = entry?.field || 'N/A';
+                        const field = entry?.field || entry?.valor || 'N/A';
                         const oficioLabel = OFICIOS.find(o => o.id === item.oficio)?.label || item.oficio;
                         return (
                           <li key={item.code} className="text-sm mb-1">
                             <span className="font-medium">{item.label} ({oficioLabel}):</span> {item.detail} <br/>
-                            <span className={cn("font-bold", estado === "ok" ? "text-green-600" : estado === "nok" ? "text-red-600" : "text-gray-500")}>Estado: {estado}</span>
+                            <span className={cn("font-bold", String(estado).match(/si|ok/i) ? "text-green-600" : String(estado).match(/no|nok/i) ? "text-red-600" : "text-gray-500")}>Estado: {estado}</span>
                             {field !== 'N/A' && field !== '' && <span> - Valor: {field}</span>}
                           </li>
                         );
@@ -184,7 +180,7 @@ export function HistorialPlanillas({ onCargar }: HistorialPlanillasProps) {
               </div>
               <div className="border-t border-border pt-3 flex justify-end gap-4">
                 <button
-                  onClick={() => setSelectedPlanilla(item)} // Cambiado para abrir el modal de solo lectura
+                  onClick={() => setSelectedPlanilla(item)}
                   className="inline-flex items-center gap-1.5 text-xs font-medium text-primary/80 hover:text-primary transition-colors"
                 >
                   <Eye className="size-3.5" /> Ver

@@ -27,7 +27,6 @@ export const AsistenteIA: React.FC = () => {
         headers: {
           'Content-Type': 'application/json',
         },
-        // Enviamos el mensaje del usuario y el historial para que la IA tenga contexto
         body: JSON.stringify({ message: input, history: messages }),
       });
 
@@ -89,39 +88,3 @@ export const AsistenteIA: React.FC = () => {
     </div>
   );
 };
-
-```
-
-### Paso 3: Mostrar el Asistente en tu Aplicación
-
-Para verlo, puedes crear una nueva "página" o ruta. Si estás usando `react-router-dom`, puedes añadir una nueva ruta. Si no, una forma sencilla es crear un archivo para la página del asistente.
-
-1.  Crea un archivo `src/pages/AsistentePage.tsx` (si no tienes una carpeta `pages`, puedes crearla).
-2.  Añade este contenido:
-
-    ```typescriptreact
-    import { AsistenteIA } from '../components/AsistenteIA';
-
-    export function AsistentePage() {
-      return (
-        <main className="container mx-auto py-8">
-          <AsistenteIA />
-        </main>
-      );
-    }
-    ```
-
-3.  Finalmente, asegúrate de que tu `App.tsx` pueda mostrar esta página.
-
-### Cómo Probarlo
-
-1.  **Inicia tu servidor API** en su terminal (`npm start` en la carpeta `servidor-api`).
-2.  **Inicia tu aplicación de React** en la otra terminal (`npm run dev`).
-3.  Navega a la ruta donde hayas puesto el `AsistentePage`.
-
-Ahora deberías ver la interfaz del chat. ¡Prueba a hacerle una pregunta!
-
-<!--
-[PROMPT_SUGGESTION]¿Cómo puedo hacer que el asistente consulte la base de datos de fallas para responder?[/PROMPT_SUGGESTION]
-[PROMPT_SUGGESTION]¿Cómo puedo mejorar el estilo del chat para que se vea más moderno?[/PROMPT_SUGGESTION]
--->

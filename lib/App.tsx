@@ -4,7 +4,7 @@ import { MantenimientoApp } from '../artifacts/deposito-castelar/src/components/
 export default function App() {
   return (
     <Router>
-      <MantenimientoApp />
+      <MantenimientoApp initialOficio="todos" lockOficio={false} />
     </Router>
   );
 }
