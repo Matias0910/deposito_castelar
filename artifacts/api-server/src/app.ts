@@ -1,11 +1,11 @@
-import express, { type Express } from "express";
+import express, { type Application } from "express";
 import cors from "cors";
 import * as pinoHttpModule from "pino-http";
 const pinoHttp = (pinoHttpModule as any).default || pinoHttpModule;
-import router from "./routes/index";
-import { logger } from "./lib/logger";
+import router from "./routes/index.js";
+import { logger } from "./lib/logger.js";
 
-const app: Express = express();
+const app: Application = express();
 
 app.use(
   pinoHttp({
