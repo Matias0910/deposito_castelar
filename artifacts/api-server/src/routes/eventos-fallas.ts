@@ -6,8 +6,8 @@ const router = Router();
 router.get(
   '/eventos-fallas',
   async (
-    req: Request<Record<string, any>, any, any, Record<string, any>>,
-    res: Response<any>,
+    req: any,
+    res: any,
   ) => {
   try {
     const query = ((req.query as any)?.q as string) || '';
