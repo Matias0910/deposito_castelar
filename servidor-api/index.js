@@ -19,6 +19,12 @@ app.use('/eventos', express.static(path.join(__dirname, '../artifacts/deposito-c
 const uri = process.env.MONGO_URI;
 const client = new MongoClient(uri);
 
+const buildSecondDigitRegex = (code) => {
+  const text = String(code);
+  if (!/^[0-9]+$/.test(text) || text.length < 2) return null;
+  return new RegExp(`^${text[0]}[0-9]${text.slice(2)}$`);
+};
+
 async function run() {
   try {
     await client.connect();
@@ -44,14 +50,24 @@ async function run() {
 
     app.get('/api/fallas', async (req, res) => {
       const query = req.query.q || '';
-      const searchQuery = query ? {
-        $or: [
-          { categoria: { $regex: query, $options: 'i' } },
-          { evento: { $regex: query, $options: 'i' } },
-          { descripcion: { $regex: query, $options: 'i' } },
-          { codigo_tcms: { $regex: query, $options: 'i' } },
-        ],
-      } : {};
+      const queryConditions = [
+        { categoria: { $regex: query, $options: 'i' } },
+        { evento: { $regex: query, $options: 'i' } },
+        { descripcion: { $regex: query, $options: 'i' } },
+      ];
+
+      const numericVal = Number(query);
+      if (!isNaN(numericVal) && query.trim() !== '') {
+        const secondDigitRegex = buildSecondDigitRegex(query);
+        if (secondDigitRegex) {
+          queryConditions.push({ codigo_tcms: secondDigitRegex });
+        }
+        queryConditions.push({ codigo_tcms: { $regex: query, $options: 'i' } });
+      } else {
+        queryConditions.push({ codigo_tcms: { $regex: query, $options: 'i' } });
+      }
+
+      const searchQuery = query ? { $or: queryConditions } : {};
 
       try {
         const fallas = await fallasCollection.find(searchQuery).limit(50).toArray();
@@ -99,6 +115,10 @@ async function run() {
         ];
 
         if (!isNaN(numericVal)) {
+          const secondDigitRegex = buildSecondDigitRegex(queryVal);
+          if (secondDigitRegex) {
+            queryConditions.push({ codigo_tcms: secondDigitRegex });
+          }
           queryConditions.push({ codigo_tcms: numericVal });
           queryConditions.push({ codigo_tcms: { $regex: queryVal, $options: 'i' } });
           queryConditions.push({ numero_evento: numericVal });
@@ -143,17 +163,20 @@ async function run() {
         else if (categoriaTexto.includes('PIDS')) eventoPdfFile = '07 - Eventos PIDS.pdf';
 
         const promptGuia = `
-        Actúa como un asistente experto en mantenimiento de trenes. 
-        Genera una respuesta corta, técnica y directa basada en los siguientes datos:
+        Actúa como un asistente práctico y directo de mantenimiento ferroviario.
+        No repitas texto literal del manual, PDF o descripción original.
+        Usa sólo los datos de la falla para entregar una solución clara y aplicable en campo.
         - Código / Evento: ${codigoTexto} - ${eventoTexto}
         - Categoría: ${categoriaTexto}
         - Planos Asociados: ${planoTexto}
         - Descripción: ${descTexto}
         - Resolución: ${resTexto}
 
-        Estructura obligatoria:
-        1. **Falla y Descripción:** Breve detalle del problema.
-        2. **Resolución Práctica:** Pasos directos para el técnico.
+        Responde de la siguiente manera:
+        1. Breve identificación del problema.
+        2. Pasos claros y prácticos para resolverlo en cancha.
+        3. No copies ni cites el PDF; simplifica.
+        4. Si no hay suficientes datos, indica qué verificar primero.
         `;
 
         const result = await model.generateContent(promptGuia);
