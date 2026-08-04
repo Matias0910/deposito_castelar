@@ -10,6 +10,9 @@ interface ChatMessage {
   planos?: string[]; // Array opcional con los números de plano
 }
 
+// Leemos la URL de la API desde las variables de entorno de Vite.
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+
 export const AsistenteIA: React.FC = () => {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState('');
@@ -33,14 +36,14 @@ export const AsistenteIA: React.FC = () => {
   const abrirModalPlano = (numeroPlano: string) => {
     // El backend ya nos da el nombre completo del archivo (ej: "SFM05"), 
     // solo necesitamos construir la URL completa.
-    const urlPdf = `http://localhost:3001/planos/${numeroPlano}.pdf`;
+    const urlPdf = `${API_URL}/planos/${numeroPlano}.pdf`;
     setPdfActivo(urlPdf);
   };
 
   const abrirModalEvento = (nombreArchivoPdf?: string) => {
     if (!nombreArchivoPdf) return;
     // Apunta al puerto 3001 del backend y a la ruta estática /eventos/
-    const urlPdf = `http://localhost:3001/eventos/${encodeURIComponent(nombreArchivoPdf)}`;
+    const urlPdf = `${API_URL}/eventos/${encodeURIComponent(nombreArchivoPdf)}`;
     setPdfActivo(urlPdf); 
   };
 
@@ -55,7 +58,7 @@ export const AsistenteIA: React.FC = () => {
     setIsLoading(true);
 
     try {
-      const response = await fetch('http://localhost:3001/api/chat', {
+      const response = await fetch(`${API_URL}/api/chat`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

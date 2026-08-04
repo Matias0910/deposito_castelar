@@ -1,6 +1,9 @@
 "use client"
 
 import { useCallback, useEffect, useState } from "react"
+// Leemos la URL de la API desde las variables de entorno de Vite.
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+
 import { getEmptyObservaciones } from "./observaciones"
 import type { PlanillaTipo } from "./planillas"
 export type { PlanillaTipo } from "./planillas"; 
@@ -124,7 +127,7 @@ export function useMantenimiento(equipoId: number, tipo: PlanillaTipo) {
     };
 
     try {
-      const response = await fetch('http://localhost:3001/api/planillas', {
+      const response = await fetch(`${API_URL}/api/planillas`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

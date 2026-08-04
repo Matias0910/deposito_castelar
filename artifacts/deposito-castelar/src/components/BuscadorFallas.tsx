@@ -14,6 +14,9 @@ interface Falla {
   eventoPdf?: string;
 }
 
+// Leemos la URL de la API desde las variables de entorno de Vite.
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+
 export const BuscadorArchivosFallas: React.FC = () => {
   const [busqueda, setBusqueda] = useState('');
   const [resultados, setResultados] = useState<Falla[]>([]);
@@ -26,7 +29,7 @@ export const BuscadorArchivosFallas: React.FC = () => {
       setCargando(true);
       // Llamamos a nuestra nueva API. La búsqueda se pasa como un parámetro 'q'.
       // Apuntamos a la URL completa de nuestro nuevo servidor API
-      const res = await fetch(`http://localhost:3001/api/fallas?q=${busqueda}`);
+      const res = await fetch(`${API_URL}/api/fallas?q=${busqueda}`);
       const data = await res.json();
       setResultados(data);
       setCargando(false);
@@ -45,7 +48,7 @@ export const BuscadorArchivosFallas: React.FC = () => {
     // Aplicar la misma lógica de formateo que en el backend para SFMXX.pdf
     const numeroFormateado = Number(numeroPlano) < 10 && !numeroPlano.startsWith('0') ? `0${numeroPlano}` : numeroPlano;
     const nombreArchivoPdf = `SFM${numeroFormateado}.pdf`;
-    const urlPdf = `http://localhost:3001/planos/${nombreArchivoPdf}`;
+    const urlPdf = `${API_URL}/planos/${nombreArchivoPdf}`;
     setPdfActivo(urlPdf);
   };
 
@@ -70,7 +73,7 @@ export const BuscadorArchivosFallas: React.FC = () => {
             // Usamos el nombre de archivo que nos provee el backend.
             let pdfEventoPath = '';
             if (item.eventoPdf) {
-              pdfEventoPath = `http://localhost:3001/eventos/${encodeURIComponent(item.eventoPdf)}`;
+              pdfEventoPath = `${API_URL}/eventos/${encodeURIComponent(item.eventoPdf)}`;
             }
 
             // Si item.plano es una cadena con múltiples números (ej: "5, 6, 17"), tomamos el primero y lo formateamos.
@@ -81,7 +84,7 @@ export const BuscadorArchivosFallas: React.FC = () => {
                   const primerNumero = numerosPlanos[0];
                   const numeroFormateado = Number(primerNumero) < 10 && !primerNumero.startsWith('0') ? `0${primerNumero}` : primerNumero;
                   // Usamos la URL completa del backend también para los planos.
-                  planoPath = `http://localhost:3001/planos/SFM${numeroFormateado}.pdf`;
+                  planoPath = `${API_URL}/planos/SFM${numeroFormateado}.pdf`;
               }
             }
 
