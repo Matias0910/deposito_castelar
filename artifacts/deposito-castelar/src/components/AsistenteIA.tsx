@@ -11,7 +11,8 @@ interface ChatMessage {
 }
 
 // Leemos la URL de la API desde las variables de entorno de Vite.
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+// Poné tu URL real de Render directo acá para descartar problemas con Vercel
+const API_URL = import.meta.env.VITE_API_URL || 'https://deposito-castelar.onrender.com';
 
 export const AsistenteIA: React.FC = () => {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
