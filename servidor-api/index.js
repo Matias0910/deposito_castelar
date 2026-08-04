@@ -239,8 +239,10 @@ async function run() {
       }
     });
 
+    const port = process.env.PORT || 3001;
+    // ...
     app.listen(port, () => {
-      console.log(`🚀 Servidor API escuchando en http://localhost:${port}`);
+    console.log(`🚀 Servidor API escuchando en el puerto ${port}`);
     });
 
   } catch (e) {
