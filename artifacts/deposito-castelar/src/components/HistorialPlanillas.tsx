@@ -16,6 +16,9 @@ interface PlanillaHistorial extends PlanillaRecord {
   updatedAt: string;
 }
 
+// Leemos la URL de la API desde las variables de entorno de Vite.
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+
 export interface HistorialPlanillasProps {
   onCargar?: (id: string) => void;
 }
@@ -27,7 +30,7 @@ export function HistorialPlanillas({}: HistorialPlanillasProps) {
   const [selectedPlanilla, setSelectedPlanilla] = useState<PlanillaHistorial | null>(null);
 
   useEffect(() => {
-    fetch('http://localhost:3001/api/planillas')
+    fetch(`${API_URL}/api/planillas`)
       .then(res => res.json())
       .then(data => {
         if (Array.isArray(data)) {
@@ -47,7 +50,7 @@ export function HistorialPlanillas({}: HistorialPlanillasProps) {
     }
 
     try {
-      const response = await fetch(`http://localhost:3001/api/planillas/${id}`, {
+      const response = await fetch(`${API_URL}/api/planillas/${id}`, {
         method: 'DELETE',
       });
 
