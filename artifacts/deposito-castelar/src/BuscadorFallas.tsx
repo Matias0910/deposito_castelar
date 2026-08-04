@@ -24,7 +24,8 @@ export const BuscadorArchivosFallas: React.FC = () => {
     const fetchFallas = async () => {
       setCargando(true);
       // Llamamos a nuestra nueva API. La búsqueda se pasa como un parámetro 'q'.
-      const res = await fetch(`/api/fallas?q=${busqueda}`);
+      const API_URL = import.meta.env.VITE_API_URL || "http://localhost:3001";
+      const res = await fetch(`${API_URL}/api/fallas?q=${busqueda}`);
       const data = await res.json();
       setResultados(data);
       setCargando(false);
